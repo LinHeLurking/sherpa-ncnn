@@ -1,0 +1,42 @@
+<html lang="en">
+    <head>
+            <meta charset="utf-8">
+            <title>sherpa ncnn!</title>
+    </head>
+
+    <body>
+            <h1 id="text">!</h1>
+            <h2 id="timestamps"></h2>
+                <script type="text/javascript">
+                        var Module = {}
+                        Module.onRuntimeInitialized = function() {
+                                console.log("WASM module initialized.")
+                                _sherpa_recognize_ncnn()
+                                var text = UTF8ToString(_sherpa_query_text())
+                                var nTimestamp = _sherpa_query_n_timestamp()
+                                var timestampPtr = _sherpa_query_timestamps()
+                                var timestamps = []
+                                for(var i = 0; i < nTimestamp; i += 1) {
+                                        timestamps.push(Module.getValue(timestampPtr + i * 4, "float"))
+                                }
+                                text = "recognize text: " + text
+                                document.getElementById("text").innerText = text
+                                document.getElementById("timestamps").innerText =  "timestamps: " + String(timestamps)
+                        }
+                        var sherpaJs = "sherpa-ncnn-wasm-simd-threads-example.js"
+                        var sherpaWorkerJs = "sherpa-ncnn-wasm-simd-threads-example.worker.js"
+                        var sherpaWasm = "sherpa-ncnn-wasm-simd-threads-example.wasm"
+                        fetch(sherpaWasm)
+                                .then(res => {
+                                        Module.wasnBinary = res.arrayBuffer();
+                                        var script = document.createElement("script")
+                                        script.src = sherpaJs
+                                        script.onload = function() {
+                                                console.log(`${sherpaJs} loaded.`)
+                                        }
+                                        document.body.appendChild(script)
+                                })
+                </script>
+    </body>
+
+</html>

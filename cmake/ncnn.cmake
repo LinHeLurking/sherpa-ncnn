@@ -5,10 +5,13 @@ function(download_ncnn)
   # The changed code is in
   # https://github.com/csukuangfj/ncnn/pull/7
 
+  # Actually sherpa runs smoothly with new ncnn. 
+  # There for URL 1 is replaced with new ncnn.
+
   # Please also change ../pack-for-embedded-systems.sh
-  set(ncnn_URL  "https://github.com/csukuangfj/ncnn/archive/refs/tags/sherpa-1.1.tar.gz")
+  set(ncnn_URL  "https://github.com/Tencent/ncnn/releases/download/20230816/ncnn-20230816-full-source.zip")
   set(ncnn_URL2 "https://huggingface.co/csukuangfj/sherpa-ncnn-cmake-deps/resolve/main/ncnn-sherpa-1.1.tar.gz")
-  set(ncnn_HASH "SHA256=254aaedf8ad3e6baaa63bcd5d23e9673e3973d7cb2154c18e5c7743d45b4e160")
+  set(ncnn_HASH "SHA256=926e1ec9af7f3d28c0f956b2f69617079728bdd12b75bf7b831a4b225c8a7584")
 
   # If you don't have access to the Internet, please download it to your
   # local drive and modify the following line according to your needs.
@@ -58,6 +61,29 @@ function(download_ncnn)
   set(NCNN_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
   set(NCNN_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   set(NCNN_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
+  if(SHERPA_NCNN_ENABLE_WASM)
+    # Change some compiler option when building WASM.
+
+    # Default options.
+    set(NCNN_THREADS OFF CACHE BOOL "" FORCE)
+    set(NCNN_OPENMP OFF CACHE BOOL "" FORCE)
+    set(NCNN_SIMPLEOMP OFF CACHE BOOL "" FORCE)
+    set(NCNN_SIMPLEOCV ON CACHE BOOL "" FORCE)
+    set(NCNN_RUNTIME_CPU OFF CACHE BOOL "" FORCE)
+    set(NCNN_SSE2 OFF CACHE BOOL "" FORCE)
+    set(NCNN_AVX OFF CACHE BOOL "" FORCE)
+    set(NCNN_AVX2 OFF CACHE BOOL "" FORCE)
+
+    if(${WASM_FEATURE} MATCHES "simd")
+      set(NCNN_SSE2 ON CACHE BOOL "" FORCE)
+    endif()
+    if(${WASM_FEATURE} MATCHES "threads")
+      set(NCNN_THREADS ON CACHE BOOL "" FORCE)
+      set(NCNN_OPENMP ON CACHE BOOL "" FORCE)
+      set(NCNN_SIMPLEOMP ON CACHE BOOL "" FORCE)
+    endif()
+  endif()
 
   # For RNN-T with ScaledLSTM, the following operators are not sued,
   # so we keep them from compiling.

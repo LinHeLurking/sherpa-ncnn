@@ -36,7 +36,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(BUILD_SHARED_LIBS "Whether to build shared libraries" OFF)
 option(SHERPA_NCNN_ENABLE_PYTHON "Whether to build Python" OFF)
 option(SHERPA_NCNN_ENABLE_PORTAUDIO "Whether to build with portaudio" ON)
-option(SHERPA_NCNN_ENABLE_JNI "Whether to build JNI internface" OFF)
+option(SHERPA_NCNN_ENABLE_JNI "Whether to build JNI interface" OFF)
 option(SHERPA_NCNN_ENABLE_BINARY "Whether to build the binary sherpa-ncnn" ON)
 option(SHERPA_NCNN_ENABLE_TEST "Whether to build tests" OFF)
 option(SHERPA_NCNN_ENABLE_C_API "Whether to build C API" ON)
@@ -46,6 +46,24 @@ option(SHERPA_NCNN_ENABLE_FFMPEG_EXAMPLES "Whether to enable ffmpeg-examples" OF
 if(DEFINED ANDROID_ABI)
   message(STATUS "Set SHERPA_NCNN_ENABLE_JNI to ON for Android")
   set(SHERPA_NCNN_ENABLE_JNI ON CACHE BOOL "" FORCE)
+endif()
+
+if(SHERPA_NCNN_ENABLE_WASM)
+  if(SHERPA_NCNN_ENABLE_PYTHON OR SHERPA_NCNN_ENABLE_PORTAUDIO OR SHERPA_NCNN_ENABLE_JNI OR SHERPA_NCNN_ENABLE_C_API OR SHERPA_NCNN_ENABLE_BINARY OR SHERPA_NCNN_ENABLE_GENERATE_INT8_SCALE_TABLE OR SHERPA_NCNN_ENABLE_TEST OR SHERPA_NCNN_ENABLE_FFMPEG_EXAMPLES)
+    message(WARNING "WASM use special toolchain so you can't build WASM with other targets. Any target other than WASM will be disabled.")
+  endif()
+  set(SHERPA_NCNN_ENABLE_PYTHON OFF)
+  set(SHERPA_NCNN_ENABLE_PORTAUDIO OFF)
+  set(SHERPA_NCNN_ENABLE_JNI OFF)
+  set(SHERPA_NCNN_ENABLE_BINARY OFF)
+  set(SHERPA_NCNN_ENABLE_TEST OFF)
+  set(SHERPA_NCNN_ENABLE_C_API OFF)
+  set(SHERPA_NCNN_ENABLE_GENERATE_INT8_SCALE_TABLE OFF)
+  set(SHERPA_NCNN_ENABLE_FFMPEG_EXAMPLES OFF)
+
+  if(NOT WASM_FEATURE)
+      message(FATAL_ERROR "You must pass cmake option -DWASM_FEATURE and possible values are basic, simd, threads and simd-threads")
+  endif()
 endif()
 
 # See
@@ -155,6 +173,11 @@ endif()
 
 if(SHERPA_NCNN_ENABLE_C_API AND SHERPA_NCNN_ENABLE_BINARY)
   add_subdirectory(c-api-examples)
+endif()
+
+if(SHERPA_NCNN_ENABLE_WASM)
+  # Add wasm example 
+  add_subdirectory(wasm-examples)
 endif()
 
 
